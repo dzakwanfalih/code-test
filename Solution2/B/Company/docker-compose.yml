@@ -1,0 +1,92 @@
+version: "3"
+
+services:
+  redis:
+    image: redis:alpine
+    hostname: redis
+    ports:
+      - 6379:6379
+
+  tomcat_1:
+    image: tomcat:9-jdk8-openjdk
+    environment:
+      VIRTUAL_HOST: t1.companyX.com
+      VIRTUAL_PORT: 8080
+    restart: always
+    volumes:
+      - "./tomcat/webapps:/usr/local/tomcat/webapps"
+      - "./tomcat/logs:/usr/local/tomcat/logs"
+      - "./tomcat/conf/context.xml:/usr/local/tomcat/conf/context.xml"
+      - "./tomcat/conf/redisson.conf:/usr/local/tomcat/redisson.conf"
+      - "./tomcat/lib/redisson-tomcat-9-3.15.5.jar:/usr/local/tomcat/lib/redisson-tomcat-9-3.15.5.jar"
+      - "./tomcat/lib/redisson-all-3.15.5.jar:/usr/local/tomcat/lib/redisson-all-3.15.5.jar"
+    links:
+      - redis
+
+
+  tomcat_2:
+    image: tomcat:9-jdk8-openjdk
+    environment:
+      VIRTUAL_HOST: t2.companyX.com
+      VIRTUAL_PORT: 8080
+    restart: always
+    volumes:
+      - "./tomcat/webapps:/usr/local/tomcat/webapps"
+      - "./tomcat/logs:/usr/local/tomcat/logs"
+      - "./tomcat/conf/context.xml:/usr/local/tomcat/conf/context.xml"
+      - "./tomcat/conf/redisson.conf:/usr/local/tomcat/redisson.conf"
+      - "./tomcat/lib/redisson-all-3.15.5.jar:/usr/local/tomcat/lib/redisson-all-3.15.5.jar"
+      - "./tomcat/lib/redisson-tomcat-9-3.15.5.jar:/usr/local/tomcat/lib/redisson-tomcat-9-3.15.5.jar"
+    links:
+      - redis
+
+
+  tomcat_3:
+    image: tomcat:9-jdk8-openjdk
+    environment:
+      VIRTUAL_HOST: t1.companyX.com
+      VIRTUAL_PORT: 8080
+    restart: always
+    volumes:
+      - "./tomcat/webapps:/usr/local/tomcat/webapps"
+      - "./tomcat/logs:/usr/local/tomcat/logs"
+      - "./tomcat/conf/context.xml:/usr/local/tomcat/conf/context.xml"
+      - "./tomcat/conf/redisson.conf:/usr/local/tomcat/redisson.conf"
+      - "./tomcat/lib/redisson-tomcat-9-3.15.5.jar:/usr/local/tomcat/lib/redisson-tomcat-9-3.15.5.jar"
+      - "./tomcat/lib/redisson-all-3.15.5.jar:/usr/local/tomcat/lib/redisson-all-3.15.5.jar"
+    links:
+      - redis
+
+
+  tomcat_4:
+    image: tomcat:9-jdk8-openjdk
+    environment:
+      VIRTUAL_HOST: t2.my-site.com
+      VIRTUAL_PORT: 8080
+    restart: always
+    volumes:
+      - "./tomcat/webapps:/usr/local/tomcat/webapps"
+      - "./tomcat/logs:/usr/local/tomcat/logs"
+      - "./tomcat/conf/context.xml:/usr/local/tomcat/conf/context.xml"
+      - "./tomcat/conf/redisson.conf:/usr/local/tomcat/redisson.conf"
+      - "./tomcat/lib/redisson-tomcat-9-3.15.5.jar:/usr/local/tomcat/lib/redisson-tomcat-9-3.15.5.jar"
+      - "./tomcat/lib/redisson-all-3.15.5.jar:/usr/local/tomcat/lib/redisson-all-3.15.5.jar"
+    links:
+      - redis
+
+
+  reverse-proxy:
+    image: jwilder/nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/certs:/etc/nginx/certs
+      - ./nginx/nginx-proxy.conf:/etc/nginx/conf.d/nginx-proxy.conf:ro
+    links:
+      - tomcat_1
+      - tomcat_2
+      - tomcat_3
+      - tomcat_4
