@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <!-- Default set of monitored resources -->
+    <WatchedResource>WEB-INF/web.xml</WatchedResource>
+    <!--
+    <Valve className="org.apache.catalina.valves.CometConnectionManagerValve" />
+    -->
+    <Manager className="org.redisson.tomcat.RedissonSessionManager"
+             configPath="${catalina.base}/redisson.conf" broadcastSessionEvents="true"
+             readMode="REDIS" updateMode="DEFAULT"/>
+</Context>
